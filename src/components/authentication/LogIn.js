@@ -5,77 +5,66 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
+import { useRef } from "react";
 import { useDispatch } from "react-redux";
-import { loginSliceActions } from "../../store/login_slice";
 import { sendUserLogInInformation } from "../../store/auth-thunke";
 import { useSelector } from "react-redux/es/exports";
 import Swal from "sweetalert2";
+import { useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const theme = createTheme();
 
 export default function SignIn() {
   const dispatch = useDispatch();
-  const [UserName, setUserName] = useState("");
-  const [Password, setPassword] = useState("");
+  const UserName = useRef();
+  const Password = useRef();
+
+  const history = useHistory();
 
   const requestResponse = useSelector((state) => state.login.requestResponse);
 
-  const usernameHandler = (event) => {
-    setUserName(event.target.value);
-  };
-
-  const passwordHandler = (event) => {
-    setPassword(event.target.value);
+  const redirectHandler = () => {
+    history.push("/home");
   };
 
   const submitHandler = (event) => {
     event.preventDefault();
-    dispatch(sendUserLogInInformation(UserName, Password));
-    dispatch(loginSliceActions.setUserLoginInfo({ UserName, Password }));
+    dispatch(
+      sendUserLogInInformation(UserName.current.value, Password.current.value)
+    );
+  };
 
+  if (requestResponse.length !== 0) {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
+    });
     if (requestResponse === "loggedin successfully") {
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener("mouseenter", Swal.stopTimer);
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        },
-      });
-
       Toast.fire({
         icon: "success",
         title: requestResponse,
       });
+      setTimeout(redirectHandler, 3000);
     } else {
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener("mouseenter", Swal.stopTimer);
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        },
-      });
-
       Toast.fire({
         icon: "error",
         title: requestResponse,
       });
     }
-  };
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -108,8 +97,7 @@ export default function SignIn() {
               name="username"
               autoComplete="username"
               autoFocus
-              onChange={usernameHandler}
-              value={UserName}
+              inputRef={UserName}
             />
             <TextField
               margin="normal"
@@ -120,8 +108,7 @@ export default function SignIn() {
               type="password"
               id="password"
               autoComplete="current-password"
-              onChange={passwordHandler}
-              value={Password}
+              inputRef={Password}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
@@ -136,14 +123,9 @@ export default function SignIn() {
               Sign In
             </Button>
             <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
-              </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
+                <Link to='/signup'>
+                  Don't have an account? Sign Up
                 </Link>
               </Grid>
             </Grid>

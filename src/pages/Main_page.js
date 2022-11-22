@@ -1,5 +1,7 @@
-const MainPage = () => {
-    return
-}
+import Albums from "../components/albums/Albums";
 
-export default MainPage
+const MainPage = () => {
+  return <Albums></Albums>;
+};
+
+export default MainPage;

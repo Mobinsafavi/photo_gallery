@@ -5,45 +5,75 @@ import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
-import { useDispatch } from "react-redux/es/exports";
+import { useRef } from "react";
+import { useDispatch, useSelector } from "react-redux/es/exports";
 import { sendUserSignUpInformation } from "../../store/auth-thunke";
-
+import Swal from "sweetalert2";
+import { useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const theme = createTheme();
 
 export default function SignUp() {
+  const dispatch = useDispatch();
 
-  const dispatch = useDispatch()
+  const Email = useRef();
+  const UserName = useRef();
+  const Password = useRef();
 
-  const [Email, setEmail] = useState("");
-  const [UserName, setUserName] = useState("");
-  const [Password, setPassword] = useState("");
+  const history = useHistory();
+  const requestResponse = useSelector((state) => state.signup.requestResponse);
 
-  const emailInputHandler = (event) => {
-    setEmail(event.target.value);
-  };
-
-  const userNameInputHandler = (event) => {
-    setUserName(event.target.value);
-  };
-
-  const passwordInputHandler = (event) => {
-    setPassword(event.target.value);
+  const redirectHandler = () => {
+    history.push("/home");
   };
 
   const submitHandler = (event) => {
+    const signUpData = {
+      Email: Email.current.value,
+      UserName: UserName.current.value,
+      Password: Password.current.value,
+    };
     event.preventDefault();
     dispatch(
-      sendUserSignUpInformation( Email, UserName, Password )
+      sendUserSignUpInformation(
+        signUpData.Email,
+        signUpData.UserName,
+        signUpData.Password
+      )
     );
   };
+
+  if (requestResponse.length !== 0) {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
+    });
+    if (requestResponse === "signedup successfully") {
+      Toast.fire({
+        icon: "success",
+        title: requestResponse,
+      });
+      setTimeout(redirectHandler, 3000);
+    } else {
+      Toast.fire({
+        icon: "error",
+        title: requestResponse,
+      });
+    }
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -76,7 +106,7 @@ export default function SignUp() {
                   label="Username"
                   name="username"
                   autoComplete="user-name"
-                  onChange={userNameInputHandler}
+                  inputRef={UserName}
                 />
               </Grid>
 
@@ -88,7 +118,7 @@ export default function SignUp() {
                   label="Email Address"
                   name="email"
                   autoComplete="email"
-                  onChange={emailInputHandler}
+                  inputRef={Email}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -100,15 +130,7 @@ export default function SignUp() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
-                  onChange={passwordInputHandler}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox value="allowExtraEmails" color="primary" />
-                  }
-                  label="I want to receive inspiration, marketing promotions and updates via email."
+                  inputRef={Password}
                 />
               </Grid>
             </Grid>
@@ -120,11 +142,9 @@ export default function SignUp() {
             >
               Sign Up
             </Button>
-            <Grid container justifyContent="flex-end">
+            <Grid container>
               <Grid item>
-                <Link href="#" variant="body2">
-                  Already have an account? Sign in
-                </Link>
+                <Link to="/login">Already have an account? Sign in</Link>
               </Grid>
             </Grid>
           </Box>
