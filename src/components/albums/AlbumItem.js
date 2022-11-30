@@ -5,37 +5,20 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
-import axios from "axios";
-import { useDispatch } from "react-redux/es/exports";
-import { albumsSliceActions } from "../../store/albums-slice";
 import { Link } from "react-router-dom";
 import albumVector from "../../assets/set_of_album_and_magazine_template_blank_page_vector_570825.jpg";
 import { useTranslation } from "react-i18next";
+import useDeleteRequest from "../../hooks/useDeleteRequest";
 
 const AlbumItem = (props) => {
-  const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const authConfigUsername = localStorage.getItem("username");
-  const authConfigPassword = localStorage.getItem("password");
+  const { isFetching, refetch } = useDeleteRequest(`/album/${props.name}`);
 
-  const deleteRequest = async () => {
-    try {
-      await axios.delete(`http://137.74.230.245:8000/album/${props.name}`, {
-        auth: {
-          username: authConfigUsername,
-          password: authConfigPassword,
-        },
-      });
-      dispatch(albumsSliceActions.changerHandler());
-    } catch (e) {
-      alert(e);
-    }
+  const deleteHandler = () => {
+    refetch();
   };
 
-  const deleteItemHandler = () => {
-    deleteRequest();
-  };
   return (
     <Grid item xs={12} sm={6} md={4}>
       <Card
@@ -60,7 +43,7 @@ const AlbumItem = (props) => {
           <Button size="small">
             <Link to={`/albums/${props.name}`}>{t("View.label")} </Link>
           </Button>
-          <Button size="small" onClick={deleteItemHandler}>
+          <Button size="small" onClick={deleteHandler}>
             {t("DELETE.lable")}
           </Button>
         </CardActions>

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { FC } from "react";
 import { useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Button from "@mui/material/Button";
@@ -15,38 +15,33 @@ import AddPhotoModal from "../photoModal/AddPhotoModal";
 import PhotoList from "./PhotoList";
 import { Collapse, Grid } from "@mui/material";
 import { useRef } from "react";
-import axios from "axios";
 import { useHistory } from "react-router-dom";
+import useGetRequest from "../../hooks/useGetRequest";
+import axios from "../../api";
 
 const theme = createTheme();
 
-const AlbumPhotos = (props) => {
+const AlbumPhotos: FC<{ param: number }> = (props) => {
   const { param } = props;
   const [showModal, setShowModal] = useState(false);
   const [collapseExpanded, setCollapseExpanded] = useState(false);
-  const newAlbumeName = useRef();
+  const newAlbumeName = useRef<HTMLInputElement>(null);
   const history = useHistory();
 
-  const authConfigUsername = localStorage.getItem("username");
-  const authConfigPassword = localStorage.getItem("password");
+  const { data, isLoading, refetch } = useGetRequest(
+    `/album/${param}/pictures`
+  );
 
   const redirectHandler = () => {
     history.push("/home");
   };
 
   const submitChangeHandler = async () => {
-    if (newAlbumeName.current.value.length > 0) {
+    if (newAlbumeName?.current?.value?.length) {
       try {
-        await axios.put(
-          `http://137.74.230.245:8000/album/${param}`,
-          { name: newAlbumeName.current.value },
-          {
-            auth: {
-              username: authConfigUsername,
-              password: authConfigPassword,
-            },
-          }
-        );
+        await axios.put(`http://137.74.230.245:8000/album/${param}`, {
+          name: newAlbumeName.current.value,
+        });
         redirectHandler();
       } catch (e) {
         console.log(e);
@@ -68,14 +63,19 @@ const AlbumPhotos = (props) => {
 
   return (
     <React.Fragment>
-      {showModal && <AddPhotoModal onClose={closeModalHandler} param={param}></AddPhotoModal>}
+      {showModal && (
+        <AddPhotoModal
+          onClose={closeModalHandler}
+          param={param}
+        ></AddPhotoModal>
+      )}
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AppBar position="relative">
           <Toolbar>
             <CameraIcon sx={{ mr: 2 }} />
             <Typography variant="h6" color="inherit" noWrap>
-            Photo Gallery App
+              Photo Gallery App
             </Typography>
           </Toolbar>
         </AppBar>
@@ -138,7 +138,7 @@ const AlbumPhotos = (props) => {
           </Box>
         </main>
       </ThemeProvider>
-      <PhotoList albumName={param}></PhotoList>
+      <PhotoList photos={data?.results}></PhotoList>
     </React.Fragment>
   );
 };

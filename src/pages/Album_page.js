@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import AlbumPhotos from "../components/photos/AlbumPhotos";
+import AlbumPhotos from "../components/photos/AlbumPhotos.tsx";
 
 const AlbumPage = () => {
   const params = useParams();

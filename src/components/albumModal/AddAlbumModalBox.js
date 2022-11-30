@@ -2,16 +2,13 @@ import styles from "./Modal.module.css";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import { useRef } from "react";
-import axios from "axios";
+import axios from "../../api";
 import { useDispatch } from "react-redux/es/exports";
-import { albumsSliceActions } from "../../store/albums-slice";
+import { changerSliceActions } from "../../store/changer-slice";
 
 const AddAlbumModalBox = (props) => {
   const newAlbumeName = useRef();
   const dispatch = useDispatch();
-
-  const authConfigUsername = localStorage.getItem('username')
-  const authConfigPassword = localStorage.getItem('password')
 
   const addAlbumHandler = () => {
     const albumName = newAlbumeName.current.value;
@@ -22,18 +19,8 @@ const AddAlbumModalBox = (props) => {
   const postNewAlbumHandler = async (albumName) => {
     const postData = { name: albumName };
     try {
-      const res = await axios.post(
-        "http://137.74.230.245:8000/albums",
-        postData,
-        {
-          auth: {
-            username: authConfigUsername,
-            password: authConfigPassword,
-          },
-        }
-      );
-      console.log(res.data);
-      dispatch(albumsSliceActions.changerHandler());
+      await axios.post("/albums", postData);
+      dispatch(changerSliceActions.changerHandler());
     } catch (e) {
       console.log(e);
     }

@@ -14,8 +14,7 @@ import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux/es/exports";
 import { sendUserSignUpInformation } from "../../store/auth-thunke";
 import Swal from "sweetalert2";
-import { useHistory } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 const theme = createTheme();
 
@@ -27,25 +26,21 @@ export default function SignUp() {
   const Password = useRef();
 
   const history = useHistory();
-  const requestResponse = useSelector((state) => state.signup.requestResponse);
+
+  const requestResponse = useSelector((state) => state.auth.requestResponse);
 
   const redirectHandler = () => {
     history.push("/home");
   };
 
   const submitHandler = (event) => {
-    const signUpData = {
-      Email: Email.current.value,
-      UserName: UserName.current.value,
-      Password: Password.current.value,
-    };
     event.preventDefault();
     dispatch(
-      sendUserSignUpInformation(
-        signUpData.Email,
-        signUpData.UserName,
-        signUpData.Password
-      )
+      sendUserSignUpInformation({
+        email: Email.current.value,
+        username: UserName.current.value,
+        password: Password.current.value,
+      })
     );
   };
 
